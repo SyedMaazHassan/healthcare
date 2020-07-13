@@ -1,0 +1,84 @@
+
+<div class="expert_doctors_area doctor_page">
+    <div class="container">
+        <div class="row">
+            {% for doctor in doctors %}
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="single_expert">
+                        <div class="expert_thumb">
+                            <img src="media/{{doctor.image}}" style="width: 100%; height: 250px;" alt="">
+                        </div>
+                        <a href="doctor/{{doctor.id}}">
+                            <div class="experts_name text-center">
+                                <h3>{{doctor.first_name}} {{doctor.last_name}} </h3>
+                                <span>{{doctor.profession}}</span>
+    
+                            </div>
+
+                        </a>
+                        
+
+                        
+
+                    </div>
+                    {% if user.is_authenticated %}
+                            {% if doctor.id in requested_doctors %}
+                                <div>
+                                    <button type="button" id="btn_{{doctor.id}}" class="btn btn-secondary btn-block py-2" onclick=""><i id="icon_{{doctor.id}}" class="fa fa-check"></i> &nbsp; <span id="span_{{doctor.id}}">Request sent</span></button>
+
+                                </div>
+
+                            {% else %}
+                                <div>
+                                    <button type="button" id="btn_{{doctor.id}}" class="btn btn-outline-primary btn-block py-2" onclick="send_appointment_request('{{doctor.id}}')"><i id="icon_{{doctor.id}}" class="fa fa-plus"></i> &nbsp; <span id="span_{{doctor.id}}">appointment &nbsp;request</span></button>
+                                </div>
+
+                            {% endif %}
+                            
+                        
+
+                    {% else %}
+                        <div>
+                            <a href="login">
+                                <button type="button" name="" id="" class="btn btn-outline-primary btn-block py-2"><i class="fa fa-plus"></i> &nbsp; appointment &nbsp;request</button>
+
+                            </a>
+                        </div>
+
+                    {% endif %}
+                    
+                </div>
+            {% endfor %}
+          
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function send_appointment_request(doctor_id) {
+        console.log("doctorID = "+doctor_id);
+
+        $.ajax({
+            url: "{% url 'send_request' %}",
+            type: 'GET',
+            data: 'doctor_id='+doctor_id,
+            success: function(response){
+                alert(response.message);
+                if (response.status==1) {
+                    $("#icon_"+doctor_id).removeClass("fa-plus");
+                    $("#icon_"+doctor_id).addClass("fa-check");
+                    $("#span_"+doctor_id).text("Request sent");
+                    $("#btn_"+doctor_id).removeClass("btn-outline-primary");
+                    $("#btn_"+doctor_id).addClass("btn-secondary");
+                    $("#btn_"+doctor_id).attr("onclick", "");
+                }
+            }
+        })
+
+        
+    }
+
+
+
+</script>

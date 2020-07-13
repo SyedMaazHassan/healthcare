@@ -1,0 +1,276 @@
+{% load static %}
+{% include 'inc/head.inc.html' %}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<body>
+    <!--[if lte IE 9]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+        <![endif]-->
+
+    <!-- Button trigger modal -->
+  
+    
+    <!-- Modal -->
+    <div class="modal fade" id="date_form" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Date & time</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                </div>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        
+                            <div class="form-group">
+                                <h5 class="my-3">for the selected appointment</h5>
+                                <input type="hidden" id="ap_id" name="AP_ID">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <input class="form-control" type="date" name="DATE" required>
+
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <input class="form-control"  type="time" name="TIME" required>
+
+                                    </div>
+                                </div>
+                            </div>
+                    
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- header-start -->
+    {% include 'inc/header.inc.html' %}
+
+    <!-- header-end -->
+    <div class="container">
+        <div class="row my-5">
+            <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+                <div class="profile p-4">
+                    {% if is_doctor %}
+                        <img src="media/{{user_info.image}}" style="width: 100px;" class="pic-profile rounded-circle my-3" alt="">
+
+                    {% else %}
+                        <img src="{% static 'img/profile_icon.png' %}" style="width: 100px;" class="pic-profile rounded-circle my-3" alt="">
+
+                    {% endif %}
+                    <p class="para-grey">{{user.email}}</p> 
+    
+                    
+    
+                    <div class="row my-4" style="text-align: left;">
+                        <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                            <i class="material-icons info-icon">person</i>
+                        </div>
+                        
+                        <div class="col-10" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Name</h5>
+                            <p class="info-sub-head">{{user.first_name}} {{user.last_name}}</p>
+    
+                        </div>
+                    </div>
+    
+                    <div class="row my-4" style="text-align: left;">
+                        <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                            <i class="material-icons info-icon">mail</i>
+                        </div>
+                        <div class="col-10" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Email</h5>
+                            <p class="info-sub-head">{{user.username}}</p>
+    
+                        </div>
+                    </div>
+
+                    {% if is_doctor %}
+                        <div class="row my-4" style="text-align: left;">
+                            <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                                <i class="material-icons info-icon">check_box</i>
+                            </div>
+                            <div class="col-10" style="padding-left: 30px;">
+                                <h5 class="text-primary text-b">Hospital</h5>
+                                <p class="info-sub-head">{{user_info.hospital}}</p>
+        
+                            </div>
+                        </div>
+
+                        <div class="row my-4" style="text-align: left;">
+                            <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                                <i class="material-icons info-icon">verified</i>
+                            </div>
+                            <div class="col-10" style="padding-left: 30px;">
+                                <h5 class="text-primary text-b">Profession</h5>
+                                <p class="info-sub-head">{{user_info.profession}}</p>
+        
+                            </div>
+                        </div>
+
+
+                    {% endif %}
+    
+                    
+                    
+                 </div>
+    
+                 
+            </div>
+
+            <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+                <div class="profile p-3 text-left mb-4">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <h4 class="mt-1">Appointments</h4>
+                        </div>
+
+                        <div class="col-sm-4 text-right">
+                            <select style="width: 150px;" class="form-control pb-4">
+                                <option>All</option>
+                                <option>Waiting for response</option>
+                                <option>Accepted</option>
+                                <option>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                </div>
+            
+                {% for appoint in all_appoints %}
+
+                {% if is_doctor %}
+                    <div class="p-4 my-4 d-flex" style="box-shadow: 4px 3px 10px #cccccc;">
+                        
+                        <img src="{% static 'img/profile_icon.png' %}" style="width: 60px; border-radius: 100%;" alt="">
+                        
+                        <div class="mx-3">
+                            <h5>{{appoint.sender_patient.first_name}} {{appoint.sender_patient.last_name}}</h5>
+                            {% if appoint.status == 0 %}
+                                <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
+                            {% elif appoint.status == 1 %}
+                                <div class="px-2 text-white" style="border-radius: 15px; width: fit-content; background-color: #00668c;">Accepted</div>
+                            {% elif appoint.status == -1 %}
+                                <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
+                            {% elif appoint.status == 2 %}
+                                <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
+                        
+                            {% endif %}
+                        </div>
+                        {% if not appoint.appointment_date %}
+                            <div class="ml-5" style="color: white;">
+                                <h5 class="text-white">Date & time</h5>
+                                {{appoint.appointment_date}}
+                                {{appoint.appointment_time}}
+                            </div>
+
+                        {% else %}
+                            <div class="ml-5">
+                                <h5 class="text-secondary">Date & time</h5>
+                                {{appoint.appointment_date}}
+                                {{appoint.appointment_time}}
+                            </div>
+
+                        {% endif %}
+                        
+
+                        {% if appoint.status == 0 %}
+                            <div class="ml-5 my-2">
+                                <h5 class="text-secondary"></h5>
+                                <button type="button" class="btn btn-success" style="width: 80px;" onclick="accept_request('{{appoint.id}}')">Accept</button>
+                                <a href="reject/{{appoint.id}}" onclick="return confirm('Are you sure to reject this appointment ?')">
+                                    <button type="button" class="btn btn-danger" style="width: 80px;">Reject</button>
+
+                                </a>
+
+                            </div>
+                        {% elif appoint.status == 1 %}
+                            <div class="ml-5 my-2">
+                                <h5 class="text-secondary"></h5>
+                                <a href="completed/{{appoint.id}}" onclick="return confirm('This appointment will be marked as completed!')">
+                                    <button type="button" class="btn btn-success">Mark as complete</button>
+
+                                </a>
+
+                            </div>
+
+                        {% endif %}
+                        
+                        
+                    </div>
+                {% else %}
+                    <div class="p-4 my-4 d-flex" style="box-shadow: 4px 3px 10px #cccccc;">
+                        
+                        <img src="media/{{appoint.to_doctor.image}}" style="width: 60px; border-radius: 100%;" alt="">
+                        
+                        <div class="mx-3">
+                            <h5>Dr. {{appoint.to_doctor.first_name}} {{appoint.to_doctor.last_name}}</h5>
+                            {% if appoint.status == 0 %}
+                                <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
+                            {% elif appoint.status == 1 %}
+                                <div class="px-2 text-white" style="border-radius: 15px; width: fit-content; background-color: #00668c;">Accepted</div>
+                            {% elif appoint.status == -1 %}
+                                <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
+                            {% elif appoint.status == 2 %}
+                                <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
+                        
+                            {% endif %}
+                        </div>
+                        <div class="ml-5">
+                            <h5 class="text-secondary">Profession</h5>
+                            {{appoint.depart}}
+                        </div>
+                        {% if appoint.appointment_date %}
+                            <div class="ml-5">
+                                <h5 class="text-secondary">Date & time</h5>
+                                {{appoint.appointment_date}}
+                                {{appoint.appointment_time}}
+                            </div>
+
+                        {% endif %}
+
+                        
+                        
+                    </div>
+
+                {% endif %}
+                
+                {% endfor %}
+
+            
+
+            </div>
+            
+        </div>
+    </div>
+    
+    
+
+        
+    <!-- Emergency_contact end -->
+
+    <!-- footer start -->
+    {% include 'inc/footer.inc.html' %}
+<!-- footer end  -->
+<!-- link that opens popup -->
+
+{% include 'inc/bottom.inc.html' %}
+
+<script>
+    function accept_request(appoint_id) {
+        $("#ap_id").val(appoint_id);
+        $("#date_form").modal("show");
+        
+    }
+</script>
