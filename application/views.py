@@ -202,4 +202,11 @@ def per_department(request, name):
     filtered_doc = doctors.objects.filter(profession=dept.related_profession_name)
     context['title'] = [dept.name, "Departments / "+dept.name]
     context['doctors'] = filtered_doc
+
+    if request.user.is_authenticated:
+        requested_doctors = appointment.objects.filter(sender_patient=request.user).values_list('to_doctor', flat=True)
+    
+        context['requested_doctors'] = requested_doctors
+
+
     return render(request, 'Doctors.html', context)
