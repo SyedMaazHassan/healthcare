@@ -2,20 +2,25 @@
 <div class="expert_doctors_area doctor_page">
     <div class="container">
         <div class="row">
+            {% if not doctors %}
+                <h3>No doctor exists in this department</h3>
+
+            {% endif %}
+
             {% for doctor in doctors %}
                 <div class="col-md-6 col-lg-3 mb-3">
                     <div class="single_expert">
                         <div class="expert_thumb">
                             <img src="media/{{doctor.image}}" style="width: 100%; height: 250px;" alt="">
                         </div>
-                        <a href="doctor/{{doctor.id}}">
-                            <div class="experts_name text-center">
-                                <h3>{{doctor.first_name}} {{doctor.last_name}} </h3>
-                                <span>{{doctor.profession}}</span>
-    
-                            </div>
+                      
+                        <div class="experts_name text-center">
+                            <h3>{{doctor.first_name}} {{doctor.last_name}} </h3>
+                            <span>{{doctor.profession}}</span>
 
-                        </a>
+                        </div>
+
+                        
                         
 
                         

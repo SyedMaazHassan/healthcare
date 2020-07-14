@@ -15,16 +15,6 @@ class department(models.Model):
 
 
 
-temp_list = []
-    
-all_depts = department.objects.all()
-
-for i in all_depts:
-    temp_val = [i.related_profession_name, i.related_profession_name]
-    temp_list.append(tuple(temp_val))
-
-
-PROFESSION_CHOICES = tuple(temp_list)
 
 
 class doctors(models.Model):
@@ -41,6 +31,19 @@ class doctors(models.Model):
     #     ("Physiologist", "Physiologist"),
     #     ("Orthopedic", "Orthopedic")
     # )
+
+    temp_list = []
+    
+    all_depts = department.objects.all()
+
+    for i in all_depts:
+        temp_val = [i.related_profession_name, i.related_profession_name]
+        temp_list.append(tuple(temp_val))
+        print(temp_val)
+
+
+    PROFESSION_CHOICES = tuple(temp_list)
+
 
     profession = models.CharField(choices = PROFESSION_CHOICES, max_length=75)
     hospital = models.CharField(max_length=75)

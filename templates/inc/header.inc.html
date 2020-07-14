@@ -43,23 +43,19 @@
                             <nav>
                                 <ul id="navigation">
                                     <li><a class="active" href="{% url 'index' %}">home</a></li>
-                                    <li><a href="departments">Departments</a></li>
-                                    <!-- <li><a href="#">blog <i class="ti-angle-down"></i></a>
-                                        <ul class="submenu">
-                                            <li><a href="blog.html">blog</a></li>
-                                            <li><a href="single-blog.html">single-blog</a></li>
-                                        </ul>
-                                    </li> -->
-                                    <li><a href="#">pages <i class="ti-angle-down"></i></a>
+                                    <li><a href="doctors">Doctors</a></li>
+                                    <li><a href="departments">Make an appointment</a></li>
+                                    <!-- <li><a href="#">pages <i class="ti-angle-down"></i></a>
                                         <ul class="submenu">
                                             <li><a href="">elements</a></li>
                                             <li><a href="">about</a></li>
                                         </ul>
-                                    </li>
+                                    </li> -->
                                     
-                                    <li><a href="doctors">Doctors</a></li>
-                                    <li><a href="contact.html">Contact</a></li>
+                                    <!-- <li><a href="contact.html">Contact</a></li> -->
                                     {% if user.is_authenticated %}
+                                        <li><a href="myProfile">Check appointments</a></li>
+
                                         <li><a href="logout">Logout</a></li>
                                         <li>
                                           
