@@ -31,25 +31,31 @@ def send_request(request):
         thisDoct = doctors.objects.get(id=doctor_id)
         dept = thisDoct.profession
 
+        isThisDoctor = doctors.objects.filter(email=request.user.username).exists()
 
-        first_check = len(appointment.objects.filter(sender_patient=request.user, status=0))
+        if isThisDoctor:
+            return HttpResponse(json.dumps({'message': "You are a doctor, You can't send appointment request", 'status':0}), content_type="application/json")
+
         
-        if first_check < 3:
+        else:
+            first_check = len(appointment.objects.filter(sender_patient=request.user, status=0))
             
-            second_check = len(appointment.objects.filter(sender_patient=request.user, status=0, depart=dept))
+            if first_check < 3:
+                
+                second_check = len(appointment.objects.filter(sender_patient=request.user, status=0, depart=dept))
 
-            if second_check < 1:
+                if second_check < 1:
 
-                new_appoint = appointment(sender_patient=request.user, to_doctor=thisDoct, depart=dept)
-                new_appoint.save()
-                return HttpResponse(json.dumps({'message': "Your request has been sent", 'status':1}), content_type="application/json")
+                    new_appoint = appointment(sender_patient=request.user, to_doctor=thisDoct, depart=dept)
+                    new_appoint.save()
+                    return HttpResponse(json.dumps({'message': "Your request has been sent", 'status':1}), content_type="application/json")
+
+                else:
+                    new_fake = fakes(request.user)
+                    return HttpResponse(json.dumps({'message': "Sorry You have sent request to the same department.", 'status':0}), content_type="application/json")
 
             else:
-                new_fake = fakes(request.user)
-                return HttpResponse(json.dumps({'message': "Sorry You have sent request to the same department.", 'status':0}), content_type="application/json")
-
-        else:
-            return HttpResponse(json.dumps({'message': "You can't send more request to the doctos", 'status':0}), content_type="application/json")
+                return HttpResponse(json.dumps({'message': "You can't send more request to the doctos", 'status':0}), content_type="application/json")
 
 
 
