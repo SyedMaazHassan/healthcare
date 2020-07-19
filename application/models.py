@@ -1,6 +1,7 @@
 from django.db import models
 import datetime
 from django.contrib.auth.models import User, auth
+from django.db.models import Sum, Count
 # Create your models here.
 
 
@@ -12,7 +13,6 @@ class department(models.Model):
 
     def __str__(self):
         return self.name
-
 
 
 
@@ -59,6 +59,16 @@ class doctors(models.Model):
         super(doctors, self).save(*args, **kwargs)
 
 
+class doctor_review(models.Model):
+    id = models.AutoField(primary_key=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    review_star = models.IntegerField()
+    review_msg = models.TextField()
+    doctor = models.ForeignKey(doctors, on_delete=models.CASCADE)
+    date = models.DateField(default=datetime.datetime.today().strftime('%Y-%m-%d'))
+
+
+
 class appointment(models.Model):
     sender_patient = models.ForeignKey(User, on_delete=models.CASCADE)
     to_doctor = models.ForeignKey(doctors, on_delete=models.CASCADE)
@@ -67,11 +77,34 @@ class appointment(models.Model):
     appointment_time = models.TimeField(null=True, blank=True)
     status = models.IntegerField(default=0)
 
-    # -1 = waiting for response
-    #  0 = rejected
+    # -2 = cancelled
+    # -1 = rejected
+    #  0 = waiting for response
     #  1 = accepted
     #  2 = completed
+
 
 class fakes(models.Model):
     USER = models.ForeignKey(User, on_delete=models.CASCADE)
     is_fake = models.BooleanField(default=True)
+
+class doctor_leave(models.Model):
+    doctor = models.ForeignKey(doctors, on_delete=models.CASCADE)
+    leave_date = models.DateField()
+
+
+class doctor_with_review:
+    def __init__(self, obj):
+        self.Doctor = obj
+        self.all_ratings = float(0)
+        self.getting_reviews()
+
+    def getting_reviews(self):
+        if doctor_review.objects.filter(doctor=self.Doctor).exists():
+            self.counting = doctor_review.objects.filter(doctor=self.Doctor).count()
+            self.summing = doctor_review.objects.filter(doctor=self.Doctor).aggregate(Sum('review_star'))
+
+            self.all_ratings = round(self.summing['review_star__sum'] / self.counting, 1)
+        else:
+            self.all_ratings = 0
+

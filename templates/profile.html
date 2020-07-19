@@ -5,6 +5,24 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+<style>
+    .add_review_icon{
+        background-color: #1d88fa;
+        color: white;
+        border-radius: 100%;
+        padding: 3px;
+        margin-left: 5px;
+        cursor: pointer;
+    }
+
+    .text-lightgrey{
+        color: #cccccc;
+    }
+</style>
+
+
+
 <body>
     <!--[if lte IE 9]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
@@ -23,7 +41,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                 </div>
-                <form action="" method="post">
+                <form action="" method="post" id="confirm_appoint">
                     {% csrf_token %}
                     <div class="modal-body">
                         
@@ -32,12 +50,12 @@
                                 <input type="hidden" id="ap_id" name="AP_ID">
                                 <div class="row">
                                     <div class="col-sm-6">
-                                        <input class="form-control" type="date" name="DATE" required>
+                                        <input class="form-control" type="date" name="DATE" id="DATE" required>
 
                                     </div>
 
                                     <div class="col-sm-6">
-                                        <input class="form-control"  type="time" name="TIME" required>
+                                        <input class="form-control"  type="time" name="TIME" id="TIME" required>
 
                                     </div>
                                 </div>
@@ -60,6 +78,280 @@
     <!-- header-end -->
     <div class="container">
         <div class="row my-5">
+
+            {% if review_view %}
+
+
+
+            <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+                <div class="profile p-4">
+             
+                    <img src="media/{{doctor.image}}" style="width: 100px;" class="pic-profile rounded-circle my-3" alt="">
+
+            
+
+              
+                    <!-- <p class="para-grey">{{doctor.email}}</p>  -->
+    
+                    
+    
+                    <div class="row my-4" style="text-align: left;">
+                        <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                            <i class="material-icons info-icon">person</i>
+                        </div>
+                        
+                        <div class="col-10" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Name</h5>
+                            <p class="info-sub-head">{{doctor.first_name}} {{doctor.last_name}}</p>
+    
+                        </div>
+                    </div>
+    
+                    <div class="row my-4" style="text-align: left;">
+                        <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                            <i class="material-icons info-icon">mail</i>
+                        </div>
+                        <div class="col-10" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Email</h5>
+                            <p class="info-sub-head">{{doctor.email}}</p>
+    
+                        </div>
+                    </div>
+
+                
+                    <div class="row my-4" style="text-align: left;">
+                        <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                            <i class="material-icons info-icon">check_box</i>
+                        </div>
+                        <div class="col-10" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Hospital</h5>
+                            <p class="info-sub-head">{{doctor.hospital}}</p>
+    
+                        </div>
+                    </div>
+
+                    <div class="row my-4" style="text-align: left;">
+                        <div class="col-1 px-4 d-flex justify-content-right align-items-center">
+                            <i class="material-icons info-icon">verified</i>
+                        </div>
+                        <div class="col-10" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Profession</h5>
+                            <p class="info-sub-head">{{doctor.profession}}</p>
+    
+                        </div>
+                    </div>
+
+
+                    {% if user.is_authenticated %}
+                            {% if doctor.id in requested_doctors %}
+                                <div>
+                                    <button type="button" id="btn_{{doctor.id}}" class="btn btn-secondary btn-block py-2" onclick=""><i id="icon_{{doctor.id}}" class="fa fa-check"></i> &nbsp; <span id="span_{{doctor.id}}">Request sent</span></button>
+
+                                </div>
+
+                            {% else %}
+                                <div>
+                                    <button type="button" id="btn_{{doctor.id}}" class="btn btn-outline-primary btn-block py-2" onclick="send_appointment_request('{{doctor.id}}')"><i id="icon_{{doctor.id}}" class="fa fa-plus"></i> &nbsp; <span id="span_{{doctor.id}}">appointment &nbsp;request</span></button>
+                                </div>
+
+                            {% endif %}
+                            
+                        
+
+                    {% else %}
+                        <div>
+                            <a href="login">
+                                <button type="button" name="" id="" class="btn btn-outline-primary btn-block py-2"><i class="fa fa-plus"></i> &nbsp; appointment &nbsp;request</button>
+
+                            </a>
+                        </div>
+
+                    {% endif %}
+
+                    <script>
+                        function send_appointment_request(doctor_id) {
+                            console.log("doctorID = "+doctor_id);
+                    
+                            $.ajax({
+                                url: "{% url 'send_request' %}",
+                                type: 'GET',
+                                data: 'doctor_id='+doctor_id,
+                                success: function(response){
+                                    alert(response.message);
+                                    if (response.status==1) {
+                                        $("#icon_"+doctor_id).removeClass("fa-plus");
+                                        $("#icon_"+doctor_id).addClass("fa-check");
+                                        $("#span_"+doctor_id).text("Request sent");
+                                        $("#btn_"+doctor_id).removeClass("btn-outline-primary");
+                                        $("#btn_"+doctor_id).addClass("btn-secondary");
+                                        $("#btn_"+doctor_id).attr("onclick", "");
+                                    }
+                                }
+                            })
+                    
+                            
+                        }
+                    
+                    
+                    
+                    </script>
+
+
+                  
+    
+                    
+                    
+                 </div>
+    
+                 
+            </div>
+
+
+            <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+
+                    <!-- review section -->
+                    <div>
+
+                    
+
+                        <h1>Reviews 
+                        {% if user.is_authenticated %}
+                            <i class="material-icons add_review_icon" title="Add your own review" data-toggle="collapse" data-target="#reviewForm">add</i>
+                        {% endif %}
+           
+                        </h1>
+
+                        
+                        <div class="collapse" id="reviewForm">
+                        <form action="" method="post" id="myReviewForm" class="my-3">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                            <textarea class="form-control" name="myReview" id="myReview" placeholder="Write your review here!" rows="3" required></textarea>
+                            </div>
+                            <input type="hidden" name="doctID" value="{{doctor.id}}">
+                            <div class="row">
+                            <div class="col-sm-4 py-2">
+                                <div class="form-group">
+                                    <select class="form-control" name="ratings" id="ratings" required>
+                                        <option value="0">Select experience</option>
+                                        <option value="5">Amazing experience</option>
+                                        <option value="4">Better experience</option>
+                                        <option value="3">Good experience</option>
+                                        <option value="2">Bad experience</option>
+                                        <option value="1">Worst experience</option>
+                    
+                                    </select>
+                                </div>
+                            </div>
+                
+                            <div class="col-sm-4 py-2">
+                                <button class="btn btn-primary px-4" type="submit">Post</button>
+                            </div>
+
+
+                            </div>
+
+                            <p class="text-danger" id="mainError"></p>
+
+                
+                        </form>
+
+                        </div>
+                        <br>
+                        {% if reviews %}
+                            {% for review in reviews %}
+
+                            <div class="profile p-3 mb-3">
+                                <div class="row text-left">
+                                    <div class="col-sm-12 d-flex">
+                                    <img src="{% static 'img/profile_icon.png' %}" alt="" style="width: 55px; height: 55px; border-radius: 100%;">
+                                    <div class="mx-3">
+                                        <h4>{{review.author.first_name}} {{review.author.last_name}}<span class="ratingNumber" style="opacity: 0;">{{review.review_star}}</span></h4>
+                                        <div style="display: inline;" class="ratingParent" >
+                                        <i class="material-icons text-lightgrey" style="margin-right: -7px;">star</i>
+                                        <i class="material-icons text-lightgrey" style="margin-right: -7px;">star</i>
+                                        <i class="material-icons text-lightgrey" style="margin-right: -7px;">star</i>
+                                        <i class="material-icons text-lightgrey" style="margin-right: -7px;">star</i>
+                                        <i class="material-icons text-lightgrey" style="margin-right: -7px;">star</i>
+                    
+                                        </div>
+                                        
+                                    </div>
+                                    </div>
+                    
+                                    <div class="col-sm-12 pt-2">
+                                        {{review.review_msg}}
+
+                                        <p class="text-primary p-0 m-0 pt-2" style="font-size: 15px;">{{review.date}}</p>
+                                    </div>
+
+                                
+                                </div>
+                
+                            </div>
+
+
+
+                            {% endfor %}
+
+                            <script>
+                                
+                                $(document).ready(function(){
+                                    let all_stars_number = $(".ratingNumber");
+                                    let parent_ratings = $(".ratingParent");
+
+
+                                    
+                                    for(let i=0; i < all_stars_number.length; i++){
+                                        let rating_number = parseInt(all_stars_number[i].innerText);
+
+                                        console.log(rating_number)
+
+                                        let current_parent = parent_ratings[i];
+
+                                        let all_children = current_parent.children
+
+                                        for (let j = 0; j < rating_number; j++) {
+                                        const single_star = all_children[j];
+
+                                        single_star.classList.remove("text-lightgrey");
+                                        single_star.classList.add("text-warning");
+                                        
+                                        }
+
+                                    
+
+                                
+                                    // console.log(current_parent);
+                                    
+                                    // for(let i=0; i<parseInt(myID); i++){
+                                    //     all_stars[i].classList.add("checked");
+                                    // }
+                                    }
+                                });
+
+                            </script>
+                        
+
+                        {% else %}
+                        
+                        <h3 class="text-secondary">No reviews yet!</h3>
+                        {% endif %}
+                    
+                    
+                    </div>
+                    
+                    <!-- review section ends -->
+
+
+            </div>
+
+
+
+
+            {% else %}
+
             <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
                 <div class="profile p-4">
                     {% if is_doctor %}
@@ -119,6 +411,36 @@
                             </div>
                         </div>
 
+                        {% if leave_taken %}
+
+                        
+
+                            <button type="button" class="btn btn-secondary btn-block">Leave taken</button>
+
+                        {% else %}
+
+                        <button type="button" class="btn btn-primary btn-block my-3" data-toggle="collapse" data-target="#contentId">Take leave</button>
+
+
+
+                        {% endif %}
+
+
+                        
+                        <div class="collapse" id="contentId">
+                            <form action="" method="post" id="leave_form">
+                                {% csrf_token %}
+                                <input class="form-control my-3" type="date" name="leave_date" id="leave_date" required>
+
+                                <p class="text-danger text-left" id="leave_form_error"></p>
+
+                                <button type="submit" class="btn btn-secondary btn-block">Submit</button>
+
+                            </form>
+                            
+                            
+                        </div>
+
 
                     {% endif %}
     
@@ -166,6 +488,10 @@
                             {% elif appoint.status == 2 %}
                                 <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
                         
+                            {% elif appoint.status == -2 %}
+                                <div class="px-2 text-white bg-secondary" style="border-radius: 15px; width: fit-content;">Cancelled</div>
+
+
                             {% endif %}
                         </div>
                         {% if not appoint.appointment_date %}
@@ -199,7 +525,7 @@
                             <div class="ml-5 my-2">
                                 <h5 class="text-secondary"></h5>
                                 <a href="completed/{{appoint.id}}" onclick="return confirm('This appointment will be marked as completed!')">
-                                    <button type="button" class="btn btn-success">Mark as complete</button>
+                                    <button type="button" class="btn btn-primary">Mark as complete</button>
 
                                 </a>
 
@@ -224,7 +550,10 @@
                                 <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
                             {% elif appoint.status == 2 %}
                                 <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
-                        
+                            {% elif appoint.status == -2 %}
+                                <div class="px-2 text-white bg-secondary" style="border-radius: 15px; width: fit-content;">Cancelled</div>
+
+
                             {% endif %}
                         </div>
                         <div class="ml-5">
@@ -251,6 +580,8 @@
             
 
             </div>
+
+            {% endif %}
             
         </div>
     </div>
@@ -273,4 +604,66 @@
         $("#date_form").modal("show");
         
     }
+
+
+    $("#myReviewForm").submit(function () {
+        var ratings = $("#ratings").val();
+        var myReview = $("#myReview").val();
+        console.log(ratings);
+        console.log(myReview);
+        if (ratings=="0" || myReview=="") {
+            $("#mainError").text("Please! complete the form before submitting");
+            return false;
+        }else{
+            return true;
+        }
+
+    });
+
+
+    $("#confirm_appoint").submit(function () {
+        var DATE = $("#DATE").val();
+        var TIME = $("#TIME").val();
+        var GIVEN_DATE = new Date(`${DATE}`);
+        var CURRENT_DATE= new Date();
+
+        CURRENT_DATE.setHours(0, 0, 0, 0);
+
+        // console.log("==========");
+        // console.log(CURRENT_DATE);
+        // console.log(GIVEN_DATE);
+        // console.log("==========");
+
+        if (GIVEN_DATE > CURRENT_DATE) {
+            return true;
+        }else{
+            alert("Kindly select the date of future to schedule appointment");
+            return false;
+        }
+    });
+
+
+    $("#leave_form").submit(function(){
+        var leave_date = $("#leave_date").val();
+        var CURRENT_DATE= new Date();
+        var GIVEN_DATE = new Date(`${leave_date}`);
+
+        CURRENT_DATE.setHours(0, 0, 0, 0);
+
+        if (GIVEN_DATE > CURRENT_DATE) {
+            $("#leave_form_error").text("");
+            return true
+            
+        }else{
+            $("#leave_form_error").text("Kindly select future date for leave");
+            return false;
+        }
+
+
+
+
+    });
+
+
+
 </script>

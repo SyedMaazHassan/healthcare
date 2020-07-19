@@ -18,7 +18,7 @@
                 <div class="col-xl-12">
                     <div class="bradcam_text">
                         <h3>{{title.0}}</h3>
-                        <p>{{title.1}}</p>
+                        <p>{{title.}}</p>
                     </div>
                 </div>
             </div>
@@ -27,7 +27,44 @@
     <!-- bradcam_area_end  -->
 
     <!-- expert_doctors_area_start -->
-    {% include 'inc/doctors_try.html' %}
+    
+
+
+    <div class="expert_doctors_area doctor_page">
+
+        <div class="section_title text-center mb-55">
+            {% ifequal title.0 'All Doctors' %}
+            <h3>All experts</h3>
+            {% else %}
+            <h3>Our Experts of {{title.0}}</h3>
+
+
+            {% endifequal %}
+    
+        </div>
+        <div class="container">
+            <div class="row">
+                {% if not rec_doctor %}
+                    <h3>No doctor exists in this department</h3>
+    
+                {% endif %}
+    
+                {% for i in rec_doctor %}
+                   
+                
+                    {% include 'inc/doctors_try.html' %}
+
+
+
+                {% endfor %}
+              
+            </div>
+        </div>
+    </div>
+
+
+
+
     <!-- expert_doctors_area_end -->
 
     <!-- testmonial_area_start -->
@@ -235,3 +272,32 @@
 <!-- link that opens popup -->
 
 {% include 'inc/bottom.inc.html' %}
+
+
+<script>
+    function send_appointment_request(doctor_id) {
+        console.log("doctorID = "+doctor_id);
+
+        $.ajax({
+            url: "{% url 'send_request' %}",
+            type: 'GET',
+            data: 'doctor_id='+doctor_id,
+            success: function(response){
+                alert(response.message);
+                if (response.status==1) {
+                    $("#icon_"+doctor_id).removeClass("fa-plus");
+                    $("#icon_"+doctor_id).addClass("fa-check");
+                    $("#span_"+doctor_id).text("Request sent");
+                    $("#btn_"+doctor_id).removeClass("btn-outline-primary");
+                    $("#btn_"+doctor_id).addClass("btn-secondary");
+                    $("#btn_"+doctor_id).attr("onclick", "");
+                }
+            }
+        })
+
+        
+    }
+
+
+
+</script>

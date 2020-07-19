@@ -101,6 +101,48 @@
     </div>
     <!-- service_area_end -->
 
+
+
+
+
+    <!-- recommended start -->
+
+    <div class="expert_doctors_area doctor_page">
+
+        <div class="section_title text-center mb-55">
+            <h3>Recommended Doctors</h3>
+    
+        </div>
+        <div class="container">
+            <div class="row">
+                {% if not rec_doctor %}
+                    <h3>No doctor exists in this department</h3>
+    
+                {% endif %}
+    
+                {% for i in rec_doctor %}
+                   
+                
+                    {% include 'inc/doctors_try.html' %}
+
+
+
+                {% endfor %}
+              
+            </div>
+        </div>
+    </div>
+    
+
+
+
+
+
+    <!-- recommended end -->
+
+
+
+
     <!-- welcome_docmed_area_start -->
     <div class="welcome_docmed_area">
         <div class="container">
@@ -307,10 +349,38 @@
     </div>
     <!-- business_expert_area_end  -->
 
-    <h2 class="text-primary text-center">OUR EXPERTS</h2>
+    <!-- <h2 class="text-primary text-center">OUR EXPERTS</h2> -->
 
     <!-- expert_doctors_area_start -->
-    {% include 'inc/doctors_try.html' %}
+
+
+
+    
+    <!-- <div class="expert_doctors_area doctor_page">
+        <div class="container">
+            <div class="row">
+                {% if not doctors %}
+                    <h3>No doctor exists in this department</h3>
+
+                {% endif %}
+
+                {% for i in doctors %}
+
+
+                    {% include 'inc/doctors_try.html' %}
+
+
+                {% endfor %}
+            
+            </div>
+        </div>
+    </div> -->
+
+
+
+
+
+
 
     <!-- expert_doctors_area_end -->
 
@@ -351,3 +421,32 @@
     <!-- link that opens popup -->
 
 {% include 'inc/bottom.inc.html' %}
+
+
+<script>
+    function send_appointment_request(doctor_id) {
+        console.log("doctorID = "+doctor_id);
+
+        $.ajax({
+            url: "{% url 'send_request' %}",
+            type: 'GET',
+            data: 'doctor_id='+doctor_id,
+            success: function(response){
+                alert(response.message);
+                if (response.status==1) {
+                    $("#icon_"+doctor_id).removeClass("fa-plus");
+                    $("#icon_"+doctor_id).addClass("fa-check");
+                    $("#span_"+doctor_id).text("Request sent");
+                    $("#btn_"+doctor_id).removeClass("btn-outline-primary");
+                    $("#btn_"+doctor_id).addClass("btn-secondary");
+                    $("#btn_"+doctor_id).attr("onclick", "");
+                }
+            }
+        })
+
+        
+    }
+
+
+
+</script>
