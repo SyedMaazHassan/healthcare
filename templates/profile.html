@@ -452,6 +452,15 @@
             </div>
 
             <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+                
+                {% for msg in messages %}
+
+                    <div class="alert alert-danger" role="alert">
+                        {{msg}}
+                    </div>
+
+                {% endfor %}
+
                 <div class="profile p-3 text-left mb-4">
                     <div class="row">
                         <div class="col-sm-8">
@@ -469,109 +478,159 @@
                     </div>
                     
                 </div>
+
+                {% if not all_appoints %}
+                    <h4 class="text-secondary my-5">No appointment exists right now</h4>
+
+                {% endif %}
+
             
                 {% for appoint in all_appoints %}
 
                 {% if is_doctor %}
-                    <div class="p-4 my-4 d-flex" style="box-shadow: 4px 3px 10px #cccccc;">
-                        
-                        <img src="{% static 'img/profile_icon.png' %}" style="width: 60px; border-radius: 100%;" alt="">
-                        
-                        <div class="mx-3">
-                            <h5>{{appoint.sender_patient.first_name}} {{appoint.sender_patient.last_name}}</h5>
-                            {% if appoint.status == 0 %}
-                                <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
-                            {% elif appoint.status == 1 %}
-                                <div class="px-2 text-white" style="border-radius: 15px; width: fit-content; background-color: #00668c;">Accepted</div>
-                            {% elif appoint.status == -1 %}
-                                <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
-                            {% elif appoint.status == 2 %}
-                                <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
-                        
-                            {% elif appoint.status == -2 %}
-                                <div class="px-2 text-white bg-secondary" style="border-radius: 15px; width: fit-content;">Cancelled</div>
+                    <div class="row mx-0 py-3 my-3" style="box-shadow: 4px 3px 10px #cccccc;">
+                        <div class="col-sm-5 d-flex align-items-center">
+                            <img src="{% static 'img/profile_icon.png' %}" style="width: 60px; height:60px; border-radius: 100%;" alt="">
 
+                            <div class="mx-4">
+                                <h5>{{appoint.sender_patient.first_name}} {{appoint.sender_patient.last_name}}</h5>
+                                {% if appoint.status == 0 %}
+                                    <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
+                                {% elif appoint.status == 1 %}
+                                    <div class="px-2 text-white" style="border-radius: 15px; width: fit-content; background-color: #00668c;">Accepted</div>
+                                {% elif appoint.status == -1 %}
+                                    <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
+                                {% elif appoint.status == 2 %}
+                                    <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
+                            
+                                {% elif appoint.status == -2 %}
+                                    <div class="px-2 text-white bg-secondary" style="border-radius: 15px; width: fit-content;">Cancelled</div>
+    
+    
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                        <div class="col-sm-3 p-0 d-flex">
+                            {% if not appoint.appointment_date %}
+                                <div class="" style="color: white;">
+                                    <h5 class="text-white">Date & time</h5>
+                                    {{appoint.appointment_date}}
+                                    {{appoint.appointment_time}}
+                                </div>
+
+                            {% else %}
+                                <div class="">
+                                    <h5 class="text-secondary">Date & time</h5>
+                                    {{appoint.appointment_date}}
+                                    {{appoint.appointment_time}}
+                                </div>
+
+                            {% endif %}
+
+
+                            
+
+                        </div>
+
+                        <div class="col-sm-4 d-flex justify-content-center">
+                            {% if appoint.status == 0 %}
+                                <div class="my-2">
+                                    <h5 class="text-secondary"></h5>
+                                    <button type="button" class="btn btn-success" style="width: 80px;" onclick="accept_request('{{appoint.id}}')">Accept</button>
+                                    <a href="reject/{{appoint.id}}" onclick="return confirm('Are you sure to reject this appointment ?')">
+                                        <button type="button" class="btn btn-danger" style="width: 80px;">Reject</button>
+
+                                    </a>
+
+                                </div>
+                            {% elif appoint.status == 1 %}
+                                <div class="my-2">
+                                    <h5 class="text-secondary"></h5>
+                                    <a href="completed/{{appoint.id}}" onclick="return confirm('This appointment will be marked as completed!')">
+                                        <button type="button" class="btn btn-primary">Complete it</button>
+
+                                    </a>
+
+                                </div>
 
                             {% endif %}
                         </div>
-                        {% if not appoint.appointment_date %}
-                            <div class="ml-5" style="color: white;">
-                                <h5 class="text-white">Date & time</h5>
-                                {{appoint.appointment_date}}
-                                {{appoint.appointment_time}}
-                            </div>
 
-                        {% else %}
-                            <div class="ml-5">
-                                <h5 class="text-secondary">Date & time</h5>
-                                {{appoint.appointment_date}}
-                                {{appoint.appointment_time}}
-                            </div>
-
-                        {% endif %}
                         
 
-                        {% if appoint.status == 0 %}
-                            <div class="ml-5 my-2">
-                                <h5 class="text-secondary"></h5>
-                                <button type="button" class="btn btn-success" style="width: 80px;" onclick="accept_request('{{appoint.id}}')">Accept</button>
-                                <a href="reject/{{appoint.id}}" onclick="return confirm('Are you sure to reject this appointment ?')">
-                                    <button type="button" class="btn btn-danger" style="width: 80px;">Reject</button>
-
-                                </a>
-
-                            </div>
-                        {% elif appoint.status == 1 %}
-                            <div class="ml-5 my-2">
-                                <h5 class="text-secondary"></h5>
-                                <a href="completed/{{appoint.id}}" onclick="return confirm('This appointment will be marked as completed!')">
-                                    <button type="button" class="btn btn-primary">Mark as complete</button>
-
-                                </a>
-
-                            </div>
-
-                        {% endif %}
                         
-                        
+                    
                     </div>
+
+                    
                 {% else %}
-                    <div class="p-4 my-4 d-flex" style="box-shadow: 4px 3px 10px #cccccc;">
-                        
-                        <img src="media/{{appoint.to_doctor.image}}" style="width: 60px; border-radius: 100%;" alt="">
-                        
-                        <div class="mx-3">
-                            <h5>Dr. {{appoint.to_doctor.first_name}} {{appoint.to_doctor.last_name}}</h5>
-                            {% if appoint.status == 0 %}
-                                <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
-                            {% elif appoint.status == 1 %}
-                                <div class="px-2 text-white" style="border-radius: 15px; width: fit-content; background-color: #00668c;">Accepted</div>
-                            {% elif appoint.status == -1 %}
-                                <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
-                            {% elif appoint.status == 2 %}
-                                <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
-                            {% elif appoint.status == -2 %}
-                                <div class="px-2 text-white bg-secondary" style="border-radius: 15px; width: fit-content;">Cancelled</div>
 
 
-                            {% endif %}
-                        </div>
-                        <div class="ml-5">
-                            <h5 class="text-secondary">Profession</h5>
-                            {{appoint.depart}}
-                        </div>
-                        {% if appoint.appointment_date %}
-                            <div class="ml-5">
-                                <h5 class="text-secondary">Date & time</h5>
-                                {{appoint.appointment_date}}
-                                {{appoint.appointment_time}}
+
+                    <div class="row mx-0 py-3 my-3" style="box-shadow: 4px 3px 10px #cccccc;">
+                        <div class="col-sm-5 pr-0 d-flex align-items-center">
+                            <img src="media/{{appoint.to_doctor.image}}" style="width: 60px; border-radius: 100%;" alt="">
+
+                            <div class="mx-4">
+                                <h5>Dr. {{appoint.to_doctor.first_name}} {{appoint.to_doctor.last_name}}</h5>
+                                {% if appoint.status == 0 %}
+                                    <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
+                                {% elif appoint.status == 1 %}
+                                    <div class="px-2 text-white" style="border-radius: 15px; width: fit-content; background-color: #00668c;">Accepted</div>
+                                {% elif appoint.status == -1 %}
+                                    <div class="px-2 bg-danger text-white" style="border-radius: 15px; width: fit-content;">Rejected</div>
+                                {% elif appoint.status == 2 %}
+                                    <div class="px-2 text-white bg-success" style="border-radius: 15px; width: fit-content;">Completed</div>
+                                {% elif appoint.status == -2 %}
+                                    <div class="px-2 text-white bg-secondary" style="border-radius: 15px; width: fit-content;">Cancelled</div>
+    
+    
+                                {% endif %}
                             </div>
 
-                        {% endif %}
+                        </div>
+
+
+                        <div class="col-sm-3">
+                            <div class="">
+                                <h5 class="text-secondary">Profession</h5>
+                                {{appoint.depart}}
+                            </div>
+                            
+                        </div>
+
+                        <div class="col-sm-4 d-flex">
+                            {% if not appoint.appointment_date %}
+                                <div class="" style="color: white;">
+                                    <h5 class="text-white">Date & time</h5>
+                                    {{appoint.appointment_date}}
+                                    {{appoint.appointment_time}}
+                                </div>
+
+                            {% else %}
+                                <div class="">
+                                    <h5 class="text-secondary">Date & time</h5>
+                                    {{appoint.appointment_date}}
+                                    {{appoint.appointment_time}}
+                                </div>
+
+                            {% endif %}
+                
+
+                        </div>
 
                         
+
                         
+
+                        
+
+                        
+                    
                     </div>
+
 
                 {% endif %}
                 

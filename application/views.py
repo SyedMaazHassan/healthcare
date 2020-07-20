@@ -173,13 +173,14 @@ def myProfile(request):
         DATE = request.POST['DATE']
         TIME = request.POST['TIME']
 
-        appoint = appointment.objects.get(id=AP_ID)
-        appoint.appointment_date = DATE
-        appoint.appointment_time = TIME
-        appoint.status = 1
-        appoint.save()
-
-
+        if appointment.objects.filter(appointment_date=DATE, appointment_time=TIME).exists():
+            messages.info(request, "Sorry! this date & time is already booked for appointment")
+        else:
+            appoint = appointment.objects.get(id=AP_ID)
+            appoint.appointment_date = DATE
+            appoint.appointment_time = TIME
+            appoint.status = 1
+            appoint.save()
 
     return profile(request, request.user.id)
 
@@ -212,6 +213,9 @@ def profile(request, id):
             print(all_doc.hospital)
             context['user_info'] = get_whole_info
 
+            
+            # all_appoints = appointment.objects.filter(to_doctor=get_whole_info)
+            # context['all_appoints'] = all_appoints
 
             if request.method == 'POST' and 'leave_date' in request.POST:
                 leave_date = request.POST['leave_date']
@@ -229,16 +233,17 @@ def profile(request, id):
                 
                 print('leave_date =', leave_date)
 
+                context['leave_taken'] = doctor_leave.objects.filter(doctor=get_whole_info).exists()
 
-
+            
             all_appoints = appointment.objects.filter(to_doctor=get_whole_info)
             context['all_appoints'] = all_appoints
+
         else:
             context['is_doctor'] = False
             all_appoints = appointment.objects.filter(sender_patient=request.user)
             context['all_appoints'] = all_appoints
 
-        context['leave_taken'] = doctor_leave.objects.filter(doctor=get_whole_info).exists()
 
         return render(request, "profile.html", context)
     else:
