@@ -59,6 +59,13 @@ def get_ratings_objects(myList, con):
     return temping
 
 
+def get_patient_obj_by_email(mail):
+    return patient.objects.get(email=mail)
+
+
+def isPatient(mail):
+    return patient.objects.filter(email=mail).exists()
+
 
 def index(request):
     context = {}
@@ -76,12 +83,15 @@ def index(request):
 
     # context['doctors'] = get_ratings_objects(all_my_doctors, False)
 
-    if request.user.is_authenticated:
-        requested_doctors1 = list(appointment.objects.filter(sender_patient=request.user, status=1).values_list('to_doctor', flat=True))
-        requested_doctors2 = list(appointment.objects.filter(sender_patient=request.user, status=0).values_list('to_doctor', flat=True))
+    if request.user.is_authenticated and isPatient(request.user.username):
+        requested_doctors1 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=1).values_list('to_doctor', flat=True))
+        requested_doctors2 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=0).values_list('to_doctor', flat=True))
         requested_doctors = requested_doctors1 + requested_doctors2
         context['requested_doctors'] = requested_doctors
 
+
+    if request.user.is_authenticated:
+        context['is_patient'] = isPatient(request.user.username)
 
     return render(request, 'index.html', context)
 
@@ -96,25 +106,29 @@ def send_request(request):
 
         isThisDoctor = doctors.objects.filter(email=request.user.username).exists()
 
+        if request.user.is_superuser:
+            return HttpResponse(json.dumps({'message': "You are admin, You can't send appointment request", 'status':0}), content_type="application/json")
+
+
         if isThisDoctor:
             return HttpResponse(json.dumps({'message': "You are a doctor, You can't send appointment request", 'status':0}), content_type="application/json")
 
         
         else:
-            first_check = len(appointment.objects.filter(sender_patient=request.user, status=0))
+            first_check = len(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=0))
             
             if first_check < 3:
                 
-                second_check = len(appointment.objects.filter(sender_patient=request.user, status=0, depart=dept))
+                second_check = len(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=0, depart=dept))
 
                 if second_check < 1:
 
-                    new_appoint = appointment(sender_patient=request.user, to_doctor=thisDoct, depart=dept)
+                    new_appoint = appointment(sender_patient=get_patient_obj_by_email(request.user.username), to_doctor=thisDoct, depart=dept)
                     new_appoint.save()
                     return HttpResponse(json.dumps({'message': "Your request has been sent", 'status':1}), content_type="application/json")
 
                 else:
-                    new_fake = fakes(request.user)
+                    new_fake = fakes(get_patient_obj_by_email(request.user.username))
                     return HttpResponse(json.dumps({'message': "Sorry You have sent request to the same department.", 'status':0}), content_type="application/json")
 
             else:
@@ -134,15 +148,26 @@ def per_doct(request, id):
         review_msg = request.POST['myReview']
         review_stars = request.POST['ratings']
         main_doc = doctors.objects.get(id=doctor_id)
-        author = request.user
 
-        new_review = doctor_review(author=author, review_star=review_stars, review_msg=review_msg, doctor=main_doc)
-        new_review.save()
 
-        print("review_msg =", review_msg)
-        print("review_stars =", review_stars)
-        print("main_doc =", main_doc.first_name)
-        print("author =", author.first_name)
+        if request.user.is_superuser:
+            messages.info(request, "Since you are admin, you can't post reviews.")
+
+        
+        else:
+            if isPatient(request.user.username):
+
+                author = get_patient_obj_by_email(request.user.username)
+
+                new_review = doctor_review(author=author, review_star=review_stars, review_msg=review_msg, doctor=main_doc)
+                new_review.save()
+
+                print("review_msg =", review_msg)
+                print("review_stars =", review_stars)
+                print("main_doc =", main_doc.first_name)
+                print("author =", author.first_name)
+            else:
+                messages.info(request, "Since you are a doctor, you can't post reviews. Thanks")
 
 
     doct_id = id
@@ -157,11 +182,14 @@ def per_doct(request, id):
     context['reviews'] = all_reviews
     context['review_view'] = True
 
-    if request.user.is_authenticated:
-        requested_doctors1 = list(appointment.objects.filter(sender_patient=request.user, status=1).values_list('to_doctor', flat=True))
-        requested_doctors2 = list(appointment.objects.filter(sender_patient=request.user, status=0).values_list('to_doctor', flat=True))
+    if request.user.is_authenticated and isPatient(request.user.username):
+        requested_doctors1 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=1).values_list('to_doctor', flat=True))
+        requested_doctors2 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=0).values_list('to_doctor', flat=True))
         requested_doctors = requested_doctors1 + requested_doctors2
         context['requested_doctors'] = requested_doctors
+
+    if request.user.is_authenticated:
+        context['is_patient'] = isPatient(request.user.username)
 
     return render(request, "profile.html", context)
 
@@ -199,6 +227,33 @@ def completed(request, id):
     return profile(request, request.user.id)
 
 
+def check_password(request):
+    if request.method == 'GET' and request.is_ajax():
+        current_password = request.GET['current_password']
+        new_password = request.GET['new_password']
+
+        pointer = request.user.username
+
+        if isPatient(pointer):
+            USER = patient.objects.get(email=pointer)
+        else:
+            USER = doctors.objects.get(email=pointer)
+
+        
+        status = False
+
+        if current_password==USER.password:
+            status = True
+
+            USER.password = new_password
+            USER.save()
+
+
+        print(current_password)
+        print(new_password)
+
+        return HttpResponse(json.dumps({'status': status}), content_type="application/json")
+
 def profile(request, id):
     context = {}
     if request.user.is_authenticated and request.user.id == id:
@@ -219,21 +274,28 @@ def profile(request, id):
 
             if request.method == 'POST' and 'leave_date' in request.POST:
                 leave_date = request.POST['leave_date']
-                new_leave = doctor_leave(doctor=get_whole_info, leave_date=leave_date)
-                new_leave.save()
 
-                # appointment cancellation
+                if doctor_leave.objects.filter(doctor=get_whole_info, leave_date=leave_date).exists():
+                    messages.info(request, "You have already taken leave of this date!")
                 
-                if appointment.objects.filter(to_doctor=get_whole_info, appointment_date=leave_date).exists():
-                    all_appointments_of_this_date = appointment.objects.filter(to_doctor=get_whole_info, appointment_date=leave_date)
+                
+                else:
+                    new_leave = doctor_leave(doctor=get_whole_info, leave_date=leave_date)
+                    new_leave.save()
 
-                    for i in all_appointments_of_this_date:
-                        i.status = -2
-                        i.save()
+                    # appointment cancellation
+                
+                    if appointment.objects.filter(to_doctor=get_whole_info, appointment_date=leave_date, status=1).exists():
+                        all_appointments_of_this_date = appointment.objects.filter(to_doctor=get_whole_info, appointment_date=leave_date)
+
+                        for i in all_appointments_of_this_date:
+                            i.status = -2
+                            i.save()
                 
                 print('leave_date =', leave_date)
 
-                context['leave_taken'] = doctor_leave.objects.filter(doctor=get_whole_info).exists()
+            
+            context['leave_taken'] = doctor_leave.objects.filter(doctor=get_whole_info).exists()
 
             
             all_appoints = appointment.objects.filter(to_doctor=get_whole_info)
@@ -241,8 +303,12 @@ def profile(request, id):
 
         else:
             context['is_doctor'] = False
-            all_appoints = appointment.objects.filter(sender_patient=request.user)
+            
+            all_appoints = appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username))
             context['all_appoints'] = all_appoints
+
+        if request.user.is_authenticated:
+            context['is_patient'] = isPatient(request.user.username)
 
 
         return render(request, "profile.html", context)
@@ -266,9 +332,13 @@ def signup(request):
         if pass1==pass2:
             if User.objects.filter(username=email).exists():
                 print("Email already taken")
-                messages.info(request, "Entered number already in use!")
+                messages.info(request, "Entered Email already in use!")
                 context['border'] = "email" 
                 return render(request, "signup.html", context)
+
+            
+            new_patient = patient(first_name=name, last_name=l_name, email=email, password=pass1)
+            new_patient.save()
 
             user = User.objects.create_user(username=email, first_name=name, password=pass1, last_name=l_name)
             user.save()
@@ -302,16 +372,19 @@ def login(request):
 def all_doctors(request):
     context = {}
     all_my_doctors = doctors.objects.all()
-    context['rec_doctor'] = get_ratings_objects(all_my_doctors, True)
+    context['rec_doctor'] = get_ratings_objects(all_my_doctors, False)
     
     context['title'] = ["All Doctors", ""]
 
-    if request.user.is_authenticated:
-        requested_doctors1 = list(appointment.objects.filter(sender_patient=request.user, status=1).values_list('to_doctor', flat=True))
-        requested_doctors2 = list(appointment.objects.filter(sender_patient=request.user, status=0).values_list('to_doctor', flat=True))
+    if request.user.is_authenticated and isPatient(request.user.username):
+        requested_doctors1 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=1).values_list('to_doctor', flat=True))
+        requested_doctors2 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=0).values_list('to_doctor', flat=True))
         requested_doctors = requested_doctors1 + requested_doctors2
         context['requested_doctors'] = requested_doctors
 
+
+    if request.user.is_authenticated:
+        context['is_patient'] = isPatient(request.user.username)
 
     return render(request, 'Doctors.html', context)
 
@@ -324,6 +397,8 @@ def all_departments(request):
     context = {}
     all_depts = department.objects.all()
     context['departments'] = all_depts
+    if request.user.is_authenticated:
+        context['is_patient'] = isPatient(request.user.username)
     return render(request, 'Department.html', context)
 
 def per_department(request, name):
@@ -337,11 +412,14 @@ def per_department(request, name):
         print(i.all_ratings)
         # print(i.first_name)
 
-    if request.user.is_authenticated:
-        requested_doctors1 = list(appointment.objects.filter(sender_patient=request.user, status=1).values_list('to_doctor', flat=True))
-        requested_doctors2 = list(appointment.objects.filter(sender_patient=request.user, status=0).values_list('to_doctor', flat=True))
+    if request.user.is_authenticated and isPatient(request.user.username):
+        requested_doctors1 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=1).values_list('to_doctor', flat=True))
+        requested_doctors2 = list(appointment.objects.filter(sender_patient=get_patient_obj_by_email(request.user.username), status=0).values_list('to_doctor', flat=True))
         requested_doctors = requested_doctors1 + requested_doctors2
         context['requested_doctors'] = requested_doctors
 
+
+    if request.user.is_authenticated:
+        context['is_patient'] = isPatient(request.user.username)
 
     return render(request, 'Doctors.html', context)

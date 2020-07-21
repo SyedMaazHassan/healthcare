@@ -16,7 +16,10 @@ urlpatterns = [
     path('profile/<id>', views.profile, name="profile"),
     path('send_request', views.send_request, name="send_request"),
     path('reject/<id>', views.reject, name="reject"),
-    path('completed/<id>', views.completed, name="completed")
+    path('completed/<id>', views.completed, name="completed"),
+    path('check_password', views.check_password, name="check_password"),
+
+
 
 ]
 

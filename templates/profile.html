@@ -72,6 +72,53 @@
         </div>
     </div>
 
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="reset_password" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                </div>
+                <form action="" method="post" id="reset_password_form">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-12 my-2">
+                                        <input class="form-control" type="password" name="current_password" id="current_password" placeholder="Current password" required>
+
+                                    </div>
+
+                                    <div class="col-sm-12 my-2">
+                                        <input class="form-control"  type="password" name="new_password" id="new_password" placeholder="New password" required>
+
+                                    </div>
+
+                                    <div class="col-sm-12 my-2">
+                                        <p class="text-danger" id="reset_form_error"></p>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                    
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- header-start -->
     {% include 'inc/header.inc.html' %}
 
@@ -223,41 +270,50 @@
 
                         
                         <div class="collapse" id="reviewForm">
-                        <form action="" method="post" id="myReviewForm" class="my-3">
-                            {% csrf_token %}
-                            
-                            <div class="form-group">
-                            <textarea class="form-control" name="myReview" id="myReview" placeholder="Write your review here!" rows="3" required></textarea>
-                            </div>
-                            <input type="hidden" name="doctID" value="{{doctor.id}}">
-                            <div class="row">
-                            <div class="col-sm-4 py-2">
+                            <form action="" method="post" id="myReviewForm" class="my-3">
+                                {% csrf_token %}
+                                
                                 <div class="form-group">
-                                    <select class="form-control" name="ratings" id="ratings" required>
-                                        <option value="0">Select experience</option>
-                                        <option value="5">Amazing experience</option>
-                                        <option value="4">Better experience</option>
-                                        <option value="3">Good experience</option>
-                                        <option value="2">Bad experience</option>
-                                        <option value="1">Worst experience</option>
-                    
-                                    </select>
+                                <textarea class="form-control" name="myReview" id="myReview" placeholder="Write your review here!" rows="3" required></textarea>
                                 </div>
-                            </div>
-                
-                            <div class="col-sm-4 py-2">
-                                <button class="btn btn-primary px-4" type="submit">Post</button>
-                            </div>
+                                <input type="hidden" name="doctID" value="{{doctor.id}}">
+                                <div class="row">
+                                <div class="col-sm-4 py-2">
+                                    <div class="form-group">
+                                        <select class="form-control" name="ratings" id="ratings" required>
+                                            <option value="0">Select experience</option>
+                                            <option value="5">Amazing experience</option>
+                                            <option value="4">Better experience</option>
+                                            <option value="3">Good experience</option>
+                                            <option value="2">Bad experience</option>
+                                            <option value="1">Worst experience</option>
+                        
+                                        </select>
+                                    </div>
+                                </div>
+                    
+                                <div class="col-sm-4 py-2">
+                                    <button class="btn btn-primary px-4" type="submit">Post</button>
+                                </div>
 
 
-                            </div>
+                                </div>
 
-                            <p class="text-danger" id="mainError"></p>
+                                <p class="text-danger" id="mainError"></p>
 
-                
-                        </form>
+                    
+                            </form>
 
                         </div>
+
+                        {% for msg in messages %}
+                            <br>
+                            
+                            <div class="alert alert-warning" role="alert">
+                                {{msg}}
+                            </div>
+                        {% endfor %}
+
                         <br>
                         {% if reviews %}
                             {% for review in reviews %}
@@ -352,6 +408,8 @@
 
             {% else %}
 
+            
+
             <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
                 <div class="profile p-4">
                     {% if is_doctor %}
@@ -411,19 +469,31 @@
                             </div>
                         </div>
 
-                        {% if leave_taken %}
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                {% if leave_taken %}
+
+                                    <button type="button" class="btn btn-secondary btn-block">Leave taken</button>
+
+                                {% else %}
+
+                                <button type="button" class="btn btn-primary btn-block my-3" data-toggle="collapse" data-target="#contentId">Take leave</button>
+
+
+
+                                {% endif %}
+
+                            </div>
+
+                            <div class="col-sm-6">
+                                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#reset_password">Reset password</button>
+                            </div>
+
+
+                        </div>
 
                         
-
-                            <button type="button" class="btn btn-secondary btn-block">Leave taken</button>
-
-                        {% else %}
-
-                        <button type="button" class="btn btn-primary btn-block my-3" data-toggle="collapse" data-target="#contentId">Take leave</button>
-
-
-
-                        {% endif %}
 
 
                         
@@ -441,6 +511,13 @@
                             
                         </div>
 
+
+                    {% else %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#reset_password">Reset password</button>
+                                </div>
+                            </div>
 
                     {% endif %}
     
@@ -460,6 +537,11 @@
                     </div>
 
                 {% endfor %}
+
+                <div class="alert alert-success alert-dismissible" id="reset_success" style="display: none;">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    Your password has been changed successfully!
+                </div>
 
                 <div class="profile p-3 text-left mb-4">
                     <div class="row">
@@ -523,7 +605,7 @@
                             {% else %}
                                 <div class="">
                                     <h5 class="text-secondary">Date & time</h5>
-                                    {{appoint.appointment_date}}
+                                    {{appoint.appointment_date}} - 
                                     {{appoint.appointment_time}}
                                 </div>
 
@@ -571,10 +653,14 @@
 
                     <div class="row mx-0 py-3 my-3" style="box-shadow: 4px 3px 10px #cccccc;">
                         <div class="col-sm-5 pr-0 d-flex align-items-center">
-                            <img src="media/{{appoint.to_doctor.image}}" style="width: 60px; border-radius: 100%;" alt="">
-
+                            <a href="doctor/{{appoint.to_doctor.id}}" style="text-decoration: none;" title="Visit profile">
+                                <img src="media/{{appoint.to_doctor.image}}" style="width: 60px; border-radius: 100%;" alt="">
+                            </a>
+                            
                             <div class="mx-4">
-                                <h5>Dr. {{appoint.to_doctor.first_name}} {{appoint.to_doctor.last_name}}</h5>
+                                <a href="doctor/{{appoint.to_doctor.id}}" style="text-decoration: none;" title="Visit profile">
+                                    <h5>Dr. {{appoint.to_doctor.first_name}} {{appoint.to_doctor.last_name}}</h5>
+                                </a>
                                 {% if appoint.status == 0 %}
                                     <div class="px-2" style="border-radius: 15px; background-color: #f21aa5; color: white; width: fit-content;">waiting for response</div>
                                 {% elif appoint.status == 1 %}
@@ -612,7 +698,7 @@
                             {% else %}
                                 <div class="">
                                     <h5 class="text-secondary">Date & time</h5>
-                                    {{appoint.appointment_date}}
+                                    {{appoint.appointment_date}} - 
                                     {{appoint.appointment_time}}
                                 </div>
 
@@ -721,6 +807,46 @@
 
 
 
+    });
+
+
+    $("#reset_password_form").submit(()=>{
+        var current_password = $("#current_password").val();
+        var new_password = $("#new_password").val();
+
+        if (current_password==new_password) {
+            $("#reset_form_error").text("Please! write a new password.");
+            return false;
+            
+        }else{
+            $("#reset_form_error").text("");
+
+        }
+
+        $.ajax({
+            url: "{% url 'check_password' %}",
+            type: 'GET',
+            data: `current_password=${current_password}&new_password=${new_password}`,
+            success: (response)=>{
+                if (!response.status) {
+
+                    $("#reset_form_error").text("Please! enter current password correctly");
+                    
+                }else{
+
+                    $("#reset_form_error").text("");
+                    $("#reset_password_form").trigger("reset");
+                    $("#reset_password").modal("hide");
+                    $(".modal-fade").modal("hide");
+                    $(".modal-backdrop").remove();
+                    $("#reset_success").css('display', 'block');
+
+                }
+            }
+
+        })
+
+        return false;
     });
 
 

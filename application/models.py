@@ -14,8 +14,14 @@ class department(models.Model):
     def __str__(self):
         return self.name
 
+class patient(models.Model):
+    first_name = models.CharField(max_length=75)
+    last_name = models.CharField(max_length=75)
+    email = models.CharField(max_length=75)
+    password = models.CharField(max_length=32)
 
-
+    def __str__(self):
+        return self.first_name+" - "+self.email
 
 class doctors(models.Model):
     first_name = models.CharField(max_length=75)
@@ -23,7 +29,7 @@ class doctors(models.Model):
     image = models.ImageField(upload_to='doctors_pic')
     email = models.CharField(max_length=75)
     city = models.CharField(max_length=75)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=32)
 
     # PROFESSION_CHOICES = (
     #     ("Neurologist", "Neurologist"),
@@ -61,16 +67,19 @@ class doctors(models.Model):
 
 class doctor_review(models.Model):
     id = models.AutoField(primary_key=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(patient, on_delete=models.CASCADE)
     review_star = models.IntegerField()
     review_msg = models.TextField()
     doctor = models.ForeignKey(doctors, on_delete=models.CASCADE)
     date = models.DateField(default=datetime.datetime.today().strftime('%Y-%m-%d'))
 
+    def __str__(self):
+        return 'Doctor: {}  -  Review author: {}  -  Date: {}'.format(self.doctor.first_name, self.author.first_name, self.date)
+
 
 
 class appointment(models.Model):
-    sender_patient = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender_patient = models.ForeignKey(patient, on_delete=models.CASCADE)
     to_doctor = models.ForeignKey(doctors, on_delete=models.CASCADE)
     depart = models.CharField(max_length=50)
     appointment_date = models.DateField(null=True, blank=True)
@@ -83,14 +92,21 @@ class appointment(models.Model):
     #  1 = accepted
     #  2 = completed
 
+    def __str__(self):
+        return "Patient: {} ({})  -  Doctor: Dr.{} ({})  -  Date: {}  -  Time: {}".format(self.sender_patient.first_name, self.sender_patient.email, self.to_doctor.first_name, self.to_doctor.email, self.appointment_date, self.appointment_time)
+
+
 
 class fakes(models.Model):
-    USER = models.ForeignKey(User, on_delete=models.CASCADE)
+    USER = models.ForeignKey(patient, on_delete=models.CASCADE)
     is_fake = models.BooleanField(default=True)
 
 class doctor_leave(models.Model):
     doctor = models.ForeignKey(doctors, on_delete=models.CASCADE)
     leave_date = models.DateField()
+
+    def __str__(self):
+        return "Dr. {} ({})  -  Date: {}".format(self.doctor.first_name, self.doctor.email, self.leave_date)
 
 
 class doctor_with_review:

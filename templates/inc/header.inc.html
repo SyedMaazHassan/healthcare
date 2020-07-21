@@ -44,7 +44,11 @@
                                 <ul id="navigation">
                                     <li><a class="active" href="{% url 'index' %}">home</a></li>
                                     <li><a href="doctors">Doctors</a></li>
-                                    <li><a href="departments">Make an appointment</a></li>
+                                    {% if is_patient %}
+                                        <li><a href="departments">Make an appointment</a></li>
+
+                                    {% endif %}
+
                                     <!-- <li><a href="#">pages <i class="ti-angle-down"></i></a>
                                         <ul class="submenu">
                                             <li><a href="">elements</a></li>
