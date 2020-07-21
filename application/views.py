@@ -311,6 +311,10 @@ def profile(request, id):
             context['is_patient'] = isPatient(request.user.username)
 
 
+        if isPatient(request.user.username):
+            context['patient_data'] = patient.objects.get(email=request.user.username)
+
+
         return render(request, "profile.html", context)
     else:
         return redirect("index")
@@ -322,6 +326,9 @@ def signup(request):
         email = request.POST['email']
         pass1 = request.POST['pass1']
         pass2 = request.POST['pass2']
+        gender = request.POST['gender']
+        age = request.POST['age']
+
         context = {
             "name":name,
             "l_name":l_name,
@@ -337,7 +344,7 @@ def signup(request):
                 return render(request, "signup.html", context)
 
             
-            new_patient = patient(first_name=name, last_name=l_name, email=email, password=pass1)
+            new_patient = patient(first_name=name, last_name=l_name, email=email, password=pass1, gender=gender, age=age)
             new_patient.save()
 
             user = User.objects.create_user(username=email, first_name=name, password=pass1, last_name=l_name)

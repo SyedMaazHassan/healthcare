@@ -19,6 +19,8 @@ class patient(models.Model):
     last_name = models.CharField(max_length=75)
     email = models.CharField(max_length=75)
     password = models.CharField(max_length=32)
+    gender = models.CharField(max_length=15, default="Nothing")
+    age = models.IntegerField(default=0)
 
     def __str__(self):
         return self.first_name+" - "+self.email
@@ -30,6 +32,8 @@ class doctors(models.Model):
     email = models.CharField(max_length=75)
     city = models.CharField(max_length=75)
     password = models.CharField(max_length=32)
+    gender = models.CharField(max_length=15, choices=(('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')), default="Nothing")
+    age = models.IntegerField(default=0)
 
     # PROFESSION_CHOICES = (
     #     ("Neurologist", "Neurologist"),

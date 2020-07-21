@@ -17,6 +17,28 @@
                     <input class="field form-control" id="email" name="email" type="email" value="{{email}}" placeholder="Email" required>
                     <input class="field form-control" id="pass1" name="pass1" type="password" value="{{pass1}}" placeholder="Password" required>
                     <input class="field form-control" id="pass2" name="pass2" type="password" value="{{pass2}}" placeholder="Confirm Password" required>
+                    
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <select class="form-control" name="gender" required>
+                                  <option value="">Gender</option>
+                                  <option value="Male">Male</option>
+                                  <option value="Female">Female</option>
+                                  <option value="Other">Other</option>
+                                  </select>
+                              </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <input class="form-control" id="pass2" name="age" type="number" min="1" max="120" placeholder="Your age" required>
+
+                        </div>
+
+                    </div>
+                    
+
+
                     <p id="error" 
                         style="
                             text-align: left; 

@@ -152,6 +152,8 @@
                             <p class="info-sub-head">{{doctor.first_name}} {{doctor.last_name}}</p>
     
                         </div>
+
+
                     </div>
     
                     <div class="row my-4" style="text-align: left;">
@@ -177,6 +179,8 @@
                         </div>
                     </div>
 
+                    
+
                     <div class="row my-4" style="text-align: left;">
                         <div class="col-1 px-4 d-flex justify-content-right align-items-center">
                             <i class="material-icons info-icon">verified</i>
@@ -184,6 +188,23 @@
                         <div class="col-10" style="padding-left: 30px;">
                             <h5 class="text-primary text-b">Profession</h5>
                             <p class="info-sub-head">{{doctor.profession}}</p>
+    
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row my-4" style="text-align: left;">
+                        
+                        <div class="col-sm-6" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Gender</h5>
+                            <p class="info-sub-head">{{doctor.gender}}</p>
+    
+                        </div>
+
+                        <div class="col-sm-6" style="padding-left: 30px;">
+                            <h5 class="text-primary text-b">Age</h5>
+                            <p class="info-sub-head">{{doctor.age}}</p>
     
                         </div>
                     </div>
@@ -469,6 +490,23 @@
                             </div>
                         </div>
 
+                        <hr>
+
+                        <div class="row my-4" style="text-align: left;">
+                            
+                            <div class="col-sm-6" style="padding-left: 30px;">
+                                <h5 class="text-primary text-b">Gender</h5>
+                                <p class="info-sub-head">{{user_info.gender}}</p>
+        
+                            </div>
+
+                            <div class="col-sm-6" style="padding-left: 30px;">
+                                <h5 class="text-primary text-b">Age</h5>
+                                <p class="info-sub-head">{{user_info.age}}</p>
+        
+                            </div>
+                        </div>
+
 
                         <div class="row">
                             <div class="col-sm-6">
@@ -513,6 +551,23 @@
 
 
                     {% else %}
+                            <hr>
+                            
+                            <div class="row my-4" style="text-align: left;">
+                                    
+                                <div class="col-sm-6" style="padding-left: 30px;">
+                                    <h5 class="text-primary text-b">Gender</h5>
+                                    <p class="info-sub-head">{{patient_data.gender}}</p>
+            
+                                </div>
+
+                                <div class="col-sm-6" style="padding-left: 30px;">
+                                    <h5 class="text-primary text-b">Age</h5>
+                                    <p class="info-sub-head">{{patient_data.age}}</p>
+            
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-sm-12">
                                     <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#reset_password">Reset password</button>
