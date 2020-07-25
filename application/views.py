@@ -3,6 +3,9 @@ from .models import *
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Sum, Count
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import json
 # Create your views here.
 
@@ -222,7 +225,14 @@ def reject(request, id):
 def completed(request, id):
     appoint = appointment.objects.get(id=id)
     appoint.status = 2
+    p_name = appoint.sender_patient.first_name+" "+appoint.sender_patient.last_name
+    d_name = appoint.to_doctor.first_name+" "+appoint.to_doctor.last_name
+    p_email = appoint.sender_patient.email
+    a_date = appoint.appointment_date
     appoint.save()
+
+
+    send_completion_email(p_name, p_email, d_name, a_date)
 
     return profile(request, request.user.id)
 
@@ -291,6 +301,9 @@ def profile(request, id):
                         for i in all_appointments_of_this_date:
                             i.status = -2
                             i.save()
+                            p_name = i.sender_patient.first_name+" "+i.sender_patient.last_name
+                            d_name = i.to_doctor.first_name+" "+i.to_doctor.last_name
+                            send_html_email(p_name, i.sender_patient.email, d_name, i.appointment_date)
                 
                 print('leave_date =', leave_date)
 
@@ -318,6 +331,101 @@ def profile(request, id):
         return render(request, "profile.html", context)
     else:
         return redirect("index")
+
+
+def send_html_email(user_name, user_email, with_doctor, on_date):
+    # me == my email address
+    # you == recipient's email address
+    sender = "******************" #email here
+    receiever = user_email
+
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = "Appointment cancellation"
+    msg['From'] = sender
+    msg['To'] = user_email
+
+    # Create the body of the message (a plain-text and an HTML version).
+    text = "Hello!\nYour appointment has been cancelled\n"
+    html = """\
+    <html>
+      <head></head>
+      <body>
+        <p><b>Hello {}!</b><br><br>
+           Your appointment has been cancelled
+           <br>
+           with <b>Dr. {}</b> on date {} due to his leave<br>
+           Kindly request appointment for another date.</p>
+      </body>
+    </html>
+    """.format(user_name, with_doctor, on_date)
+
+    # Record the MIME types of both parts - text/plain and text/html.
+    part1 = MIMEText(text, 'plain')
+    part2 = MIMEText(html, 'html')
+
+    # Attach parts into message container.
+    # According to RFC 2046, the last part o f a multipart message, in this case
+    # the HTML message, is best and preferred.
+    msg.attach(part1)
+    msg.attach(part2)
+
+    # Send the message via local SMTP server.
+    mail = smtplib.SMTP('smtp.gmail.com', 587)
+    mail.ehlo()
+    mail.starttls()
+    mail.login(sender, '***********') #password here
+    mail.sendmail(sender, user_email, msg.as_string())
+    mail.quit()
+
+
+
+def send_completion_email(user_name, user_email, with_doctor, on_date):
+    # me == my email address
+    # you == recipient's email address
+    sender = "******************" #email here
+    receiever = user_email
+
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = "Appointment Completed"
+    msg['From'] = sender
+    msg['To'] = user_email
+
+    # Create the body of the message (a plain-text and an HTML version).
+    text = "Hello!\nYour appointment has been successfully completed\n"
+    html = """\
+    <html>
+      <head></head>
+      <body>
+        <p><b>Hello {}!</b><br><br>
+           Your appointment has been successfully completed
+           <br>
+           with <b>Dr. {}</b> on date {}<br>
+           Thanks for using our service.</p>
+      </body>
+    </html>
+    """.format(user_name, with_doctor, on_date)
+
+    # Record the MIME types of both parts - text/plain and text/html.
+    part1 = MIMEText(text, 'plain')
+    part2 = MIMEText(html, 'html')
+
+    # Attach parts into message container.
+    # According to RFC 2046, the last part o f a multipart message, in this case
+    # the HTML message, is best and preferred.
+    msg.attach(part1)
+    msg.attach(part2)
+
+    # Send the message via local SMTP server.
+    mail = smtplib.SMTP('smtp.gmail.com', 587)
+    mail.ehlo()
+    mail.starttls()
+    mail.login(sender, '***********') #password here
+    mail.sendmail(sender, user_email, msg.as_string())
+    mail.quit()
+
+
 
 def signup(request):
     if request.method == "POST":
